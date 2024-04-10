@@ -1,0 +1,123 @@
+sudo apt install -y php-cli php-fpm php-json php-intl php-imagick php-pdo php-mysql php-zip php-gd php-mbstring php-curl php-xml php-pear php-bcmath php-gmp
+
+apt install mariadb-server -y
+
+mysql_secure_installation
+
+todo yes con la contraseña ita0*123N3x
+
+mysql -u root -p
+
+ita0*123N3x
+
+CREATE USER 'itaonex'@'localhost' IDENTIFIED BY 'N3XCKVMitao123*';
+
+CREATE DATABASE nextcloud;
+
+SHOW DATABASES;
+
+GRANT ALL PRIVILEGES ON nextcloud.* TO 'itaonex'@'localhost';
+
+FLUSH PRIVILEGES;
+
+exit
+
+para hacer una copia de seguridad de mysql usamos
+mysqldump -u nextcloud -p nextcloud > respaldo.sql
+
+para importar la copia del respaldo en la nueva base de datos usamos
+mysql -u itaonex -p nextcloud < /home/itaovmkvm/respaldo.sql
+
+colocamos la contraseña : N3XCKVMitao123*
+
+apt install -y apache2 libapache2-mod-php
+
+cd /etc/apache2/sites-available/
+
+cp 000-default.conf nextcloud.conf
+
+nano ~/.bashrc
+
+export PATH=$PATH:/usr/sbin
+
+source ~/.bashrc
+
+a2dissite 000-default.conf
+
+systemctl reload apache2
+
+nano nextcloud.conf
+
+DocumentRoot /var/www/html/nextcloud/
+
+a2enmod rewrite dir mime env headers
+
+systemctl restart apache2
+
+nano nextcloud.conf
+
+  <Directory /var/www/html/nextcloud>
+Options +FollowSymlinks
+AllowOverride All
+Require all granted
+SetEnv HOME /var/www/html/nextcloud
+SetEnv HTTP_HOME /var/www/html/nextcloud
+<IfModule mod_dav.c>
+ Dav off
+</IfModule>
+</Directory>
+
+cd /var/www/html/
+
+mkdir nextcloud
+
+chmod 750 nextcloud/
+
+chown www-data:www-data nextcloud/
+
+cd nextcloud
+
+wget https://download.nextcloud.com/server/installer/setup-nextcloud.php
+
+chown www-data:www-data setup-nextcloud.php
+
+a2ensite nextcloud.conf
+
+systemctl restart apache2
+
+systemctl status apache2
+
+cd /home/itaovmkvm
+
+para comprimir y descomprimir un achivo
+
+tar -cvf nextcloud.tar /var/www/html/nextcloud
+
+xz -T0 -9 nextcloud.tar
+
+tar Jvxf nextcloud.tar.xz
+
+mv /home/itaovmkvm/nextcloud /var/www/html
+
+si al ejecutar nos pide que usemos una version mas antigua de php como la php8.0
+lo solucionamos con estos comandos
+
+sudo apt install lsb-release ca-certificates apt-transport-https software-properties-common -y
+sudo wget -O /etc/apt/trusted.gpg.d/php.gpg https://packages.sury.org/php/apt.gpg 
+echo "deb https://packages.sury.org/php/ $(lsb_release -sc) main" | sudo tee /etc/apt/sources.list.d/php.list
+
+sudo apt update
+sudo apt install php8.0 php8.0-common php8.0-mysql php8.0-xml php8.0-xmlrpc php8.0-curl php8.0-gd php8.0-imagick php8.0-cli php8.0-dev php8.0-imap php8.0-mbstring php8.0-opcache php8.0-soap php8.0-zip php8.0-intl -y
+
+sudo a2dismod php8.2
+sudo a2enmod php8.0
+
+sudo systemctl restart apache2
+
+solo refrescamos y tendremos funcionando perfectamente el nextcloud
+
+nano /etc/php/8.0/apache2/php.ini
+
+cambiamos memory_limit = 3G
+
+systemctl restart apache2

@@ -1,0 +1,15 @@
+nombre del serv: servitao
+usuario: itaokvm
+password: itaovkm1234*
+su: itaokvm12345*
+
+mysql
+root
+passw: ita0*123N3x
+usuario: itaonex
+password: N3XCKVMitao123*
+
+Netxcloud servidor:
+Usuario: nextcloud
+Contraseña: N3XTCL0UD12345*
+Administrador

@@ -1,0 +1,167 @@
+wget https://download.qemu.org/qemu-8.1.0.tar.xz
+
+apt install build-essential python3 python3-pip xz-utils pkg-config libglib2.0-dev libmount-dev libpixman-1-dev libspice-protocol-dev libspice-server-dev libgail-3-dev liblzo2-dev -y
+
+sudo apt install python3.11-venv
+
+python3 -m venv xibalba
+
+source xibalba/bin/activate
+
+pip3 install ninja
+
+deactivate
+
+tar Jvxf qemu-8.1.0.tar.xz
+
+cd qemu-8.1.0
+
+sudo apt-get install ninja-build
+
+./configure --prefix=/opt/qemu-8 --target-list=i386-softmmu,x86_64-softmmu --enable-spice --enable-gtk
+
+nproc
+
+make -j 4
+
+cd..
+
+nano bridge.sh
+
+#! /bin/bash
+ip link add name br0 type bridge
+
+ip add del 192.168.1.114/24 dev enp2s1
+ip link set dev enp2s1 master br0
+ip add add 192.168.1.114/24 dev br0
+
+ip link set dev br0 up
+
+chmod +x bridge.sh
+
+sudo nano /etc/network/if-up.d/bridge.sh
+
+sudo chmod +x /etc/network/if-up.d/bridge.sh
+
+
+./bridge.sh
+
+cd /
+
+mkdir vm
+
+cd /vm
+
+mkdir iso
+
+mkdir mictlan
+
+find / -name qemu-img 2>/dev/null
+
+nano ~/.bashrc
+
+export PATH=$PATH:/root/qemu-8.1.0/build/qemu-bundle/opt/qemu-8/bin/
+
+source ~/.bashrc
+
+cd mictlan
+
+qemu-img create -f qcow2 disco1.qcow2 20G
+
+cd ..
+
+nano equipo1.sh
+
+chmod +x equipo1.sh
+
+#! /bin/bash
+
+qemu-system-x86_64 --enable-kvm -name win10 -m 8G -smp 8 -machine type=q35,accel=kvm -drive file=mictlan/EliteOS7.qcow2,index=0,media=disk,if=ide -drive file=iso/EliteOS7.iso,index=1,media=cdrom -vga qxl -spice port=5932,disable-ticketing=on
+
+
+
+#! /bin/bash
+
+qemu-system-x86_64 --enable-kvm -name win10 -m 8G -cpu host -smp 8 -device qxl-vga -machine type=q35,accel=kvm -drive file=maquinas/disco1.qcow2,index=0,media=disk,if=ide,cache=unsafe,format=qcow2 -drive file=iso/EliteOS.iso,index=1,media=cdrom -net nic,macaddr=52:54:68:cb:06:98 -net bridge,br=br0 -vga virtio -spice port=5930,disable-ticketing=on -daemonize
+
+
+
+
+
+
+
+mv /home/mictlan/EliteOS7.iso /vm/iso/
+
+./EliteOS.sh
+./debian.sh
+./EliteOS7.sh
+
+win10
+spice://192.168.100.27:5930
+deb12
+spice://192.168.100.27:5931
+win7
+spice://192.168.100.27:5933
+
+printf -v macaddr1 "52:54:%02x:%02x:%02x:%02x" $(( $RANDOM & 0xff)) $(( $RANDOM & 0xff)) $(( $RANDOM & 0xff)) $(( $RANDOM & 0xff))
+
+echo $macaddr
+
+win10
+
+qemu-system-x86_64 --enable-kvm -name EliteOS -m 8G -smp 4 -machine type=q35,accel=kvm -drive file=mictlan/xibalba.qcow2,index=0,media=disk,if=ide -net nic,macaddr=52:54:5a:6f:d7:e3 -net bridge,br=br0 -vga qxl -spice port=5930,disable-ticketing=on
+
+dev
+
+qemu-system-x86_64 --enable-kvm -name dev -m 8G -smp 4 -machine type=q35,accel=kvm -drive file=mictlan/mictlan.qcow2,index=0,media=disk,if=ide -net nic,macaddr1=52:54:09:92:53:c6 -net bridge,br=br0 -vga qxl -spice port=5932,disable-ticketing=on
+
+win7
+
+qemu-system-x86_64 --enable-kvm -name EliteOS7 -m 8G -smp 4 -machine type=q35,accel=kvm -drive file=mictlan/EliteOS7.qcow2,index=0,media=disk,if=ide -net nic,macaddr1=52:54:82:0a:8a:21 -net bridge,br=br0 -vga qxl -spice port=5932,disable-ticketing=on
+
+
+root@servitao:/vm/iso# printf -v macaddr1 "52:54:%02x:%02x:%02x:%02x" $(( $RANDOM & 0xff)) $(( $RANDOM & 0xff)) $(( $RANDOM & 0xff)) $(( $RANDOM & 0xff))
+root@servitao:/vm/iso# echo $macaddr1
+52:54:68:cb:06:98
+root@servitao:/vm/iso# printf -v macaddr2 "52:54:%02x:%02x:%02x:%02x" $(( $RANDOM & 0xff)) $(( $RANDOM & 0xff)) $(( $RANDOM & 0xff)) $(( $RANDOM & 0xff))
+root@servitao:/vm/iso# echo $macaddr2
+52:54:d6:f7:9e:4d
+root@servitao:/vm/iso# printf -v macaddr3 "52:54:%02x:%02x:%02x:%02x" $(( $RANDOM & 0xff)) $(( $RANDOM & 0xff)) $(( $RANDOM & 0xff)) $(( $RANDOM & 0xff))
+root@servitao:/vm/iso# echo $macaddr3
+52:54:4b:d9:36:c0
+root@servitao:/vm/iso# printf -v macaddr4 "52:54:%02x:%02x:%02x:%02x" $(( $RANDOM & 0xff)) $(( $RANDOM & 0xff)) $(( $RANDOM & 0xff)) $(( $RANDOM & 0xff))
+root@servitao:/vm/iso# echo $macaddr4
+52:54:43:4d:db:39
+root@servitao:/vm/iso# printf -v macaddr5 "52:54:%02x:%02x:%02x:%02x" $(( $RANDOM & 0xff)) $(( $RANDOM & 0xff)) $(( $RANDOM & 0xff)) $(( $RANDOM & 0xff))
+root@servitao:/vm/iso# echo $macaddr5
+52:54:37:a2:67:3a
+root@servitao:/vm/iso# printf -v macaddr6 "52:54:%02x:%02x:%02x:%02x" $(( $RANDOM & 0xff)) $(( $RANDOM & 0xff)) $(( $RANDOM & 0xff)) $(( $RANDOM & 0xff))
+root@servitao:/vm/iso# echo $macaddr6
+52:54:ed:11:b5:05
+root@servitao:/vm/iso# printf -v macaddr7 "52:54:%02x:%02x:%02x:%02x" $(( $RANDOM & 0xff)) $(( $RANDOM & 0xff)) $(( $RANDOM & 0xff)) $(( $RANDOM & 0xff))
+root@servitao:/vm/iso# echo $macaddr7
+52:54:21:8b:33:a0
+root@servitao:/vm/iso# printf -v macaddr8 "52:54:%02x:%02x:%02x:%02x" $(( $RANDOM & 0xff)) $(( $RANDOM & 0xff)) $(( $RANDOM & 0xff)) $(( $RANDOM & 0xff))
+root@servitao:/vm/iso# echo $macaddr8
+52:54:7f:b6:3a:a2
+root@servitao:/vm/iso# printf -v macaddr9 "52:54:%02x:%02x:%02x:%02x" $(( $RANDOM & 0xff)) $(( $RANDOM & 0xff)) $(( $RANDOM & 0xff)) $(( $RANDOM & 0xff))
+root@servitao:/vm/iso# echo $macaddr9
+52:54:e8:cf:96:92
+root@servitao:/vm/iso# printf -v macaddr10 "52:54:%02x:%02x:%02x:%02x" $(( $RANDOM & 0xff)) $(( $RANDOM & 0xff)) $(( $RANDOM & 0xff)) $(( $RANDOM & 0xff))
+root@servitao:/vm/iso# echo $macaddr10
+52:54:85:a3:39:f8
+
+ubuntu
+#! /bin/bash
+
+qemu-system-x86_64 --enable-kvm -name ubuntu -m 4G -cpu host -smp 4 -machine type=q35,accel=kvm -drive file=maquinas/disco4.qcow2,index=0,media=disk,if=virrtio,cache=unsafe,format=qcow2 -drive file=iso/ubuntu.iso,index=1,media=cdrom -net nic,macaddr=52:54:85:a3:39:f8 -net bridge,br=br0 -vga virtio -spice port=5933,disable-ticketing=on -daemonize
+
+
+
+
+itaovmkvm
+itaovkm1234*
+itaookvm12345*
+
+drivers
+apt install firmware-linux firmware-linux-nonfree
